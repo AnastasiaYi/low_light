@@ -5,7 +5,7 @@
 
 ### Training MixFormer-22k
 # Stage1: train mixformer without SPM
-python tracking/train.py --script mixformer_cvt --config baseline --save_dir . --mode single --nproc_per_node 8
+# python tracking/train.py --script mixformer_cvt --config baseline --save_dir . --mode single --nproc_per_node 8
 ## Stage2: train mixformer_online, i.e., SPM (score prediction module)
 # python tracking/train.py --script mixformer_cvt_online --config baseline --save_dir /YOUR/PATH/TO/SAVE/MIXFORMER_ONLINE --mode multiple --nproc_per_node 8 --stage1_model /STAGE1/MODEL
 
@@ -16,7 +16,7 @@ python tracking/train.py --script mixformer_cvt --config baseline --save_dir . -
 
 
 ### Training MixFormer-1k
-#python tracking/train.py --script mixformer_cvt --config baseline_1k --save_dir /YOUR/PATH/TO/SAVE/MIXFORMER_1K --mode multiple --nproc_per_node 8
+python tracking/train.py --script mixformer_cvt --config baseline_1k --save_dir /content/low_light/MixFormer/trained/ --mode multiple --nproc_per_node 1
 #python tracking/train.py --script mixformer_cvt_online --config baseline --save_dir /YOUR/PATH/TO/SAVE/MIXFORMER_1K_ONLINE --mode multiple --nproc_per_node 8 \
 #     --stage1_model /STAGE1/MODEL
 

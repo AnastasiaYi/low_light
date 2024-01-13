@@ -28,7 +28,7 @@ def names2datasets(name_list: list, settings, image_loader):
     assert isinstance(name_list, list)
     datasets = []
     for name in name_list:
-        assert name in ["LASOT", "GOT10K_vottrain", "GOT10K_votval", "GOT10K_train_full", "COCO17", "VID", "TRACKINGNET", "TNL2k"]
+        assert name in ["GOT10K_train_temp", "GOT10K_val_temp", "LASOT", "GOT10K_vottrain", "GOT10K_votval", "GOT10K_train_full", "COCO17", "VID", "TRACKINGNET", "TNL2k"]
         if name == "LASOT":
             if settings.use_lmdb:
                 print("Building lasot dataset from lmdb")
@@ -55,6 +55,19 @@ def names2datasets(name_list: list, settings, image_loader):
                 datasets.append(Got10k_lmdb(settings.env.got10k_lmdb_dir, split='votval', image_loader=image_loader))
             else:
                 datasets.append(Got10k(settings.env.got10k_dir, split='votval', image_loader=image_loader))
+        # Use val set for training set for now
+        if name == "GOT10K_train_temp":
+            if settings.use_lmdb:
+                print("Building got10k from lmdb")
+                datasets.append(Got10k_lmdb(settings.env.got10k_lmdb_dir, split='train_temp', image_loader=image_loader))
+            else:
+                datasets.append(Got10k(settings.env.got10k_dir, split='train_temp', image_loader=image_loader))
+        if name == "GOT10K_val_temp":
+            if settings.use_lmdb:
+                print("Building got10k from lmdb")
+                datasets.append(Got10k_lmdb(settings.env.got10k_lmdb_dir, split='val_temp', image_loader=image_loader))
+            else:
+                datasets.append(Got10k(settings.env.got10k_dir, split='val_temp', image_loader=image_loader))
         if name == "COCO17":
             if settings.use_lmdb:
                 print("Building COCO2017 from lmdb")

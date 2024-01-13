@@ -21,27 +21,21 @@ DATA:
     NUMBER: 2
   TRAIN:
     DATASETS_NAME:
-    - GOT10K_vottrain
-    - LASOT
-    - COCO17
-    - TRACKINGNET
+    - GOT10K_train_temp
     DATASETS_RATIO:
     - 1
-    - 1
-    - 1
-    - 1
-    SAMPLE_PER_EPOCH: 60000
+    SAMPLE_PER_EPOCH: 100
   VAL:
     DATASETS_NAME:
-    - GOT10K_votval
+    - GOT10K_val_temp
     DATASETS_RATIO:
     - 1
-    SAMPLE_PER_EPOCH: 10000
+    SAMPLE_PER_EPOCH: 20
 MODEL:
   VIT_TYPE: 'cvt_21'
   BACKBONE:
     PRETRAINED: True
-    PRETRAINED_PATH: '/YOUR/PRETRAINED/CVT/DIR/CvT-21-384x384-IN-1k.pth'    #'/home/cyt/project/CvtT/models/CvT-21-384x384-IN-1k.pth'
+    PRETRAINED_PATH: '/content/low_light/MixFormer/pretrained/CvT-21-384x384-IN-1k.pth'    #'/home/cyt/project/CvtT/models/CvT-21-384x384-IN-1k.pth'
     INIT: 'trunc_norm'
     NUM_STAGES: 3
     PATCH_SIZE: [ 7, 3, 3 ]
@@ -73,12 +67,12 @@ TRAIN:
   BACKBONE_MULTIPLIER: 1.0
   BATCH_SIZE: 8
   DEEP_SUPERVISION: false
-  EPOCH: 500
+  EPOCH: 10
   IOU_WEIGHT: 2.0
   GRAD_CLIP_NORM: 0.1
   L1_WEIGHT: 5.0
   LR: 0.0001 #0.0001
-  LR_DROP_EPOCH: 400
+  LR_DROP_EPOCH: 8
   NUM_WORKER: 8
   OPTIMIZER: ADAMW
   PRINT_INTERVAL: 50

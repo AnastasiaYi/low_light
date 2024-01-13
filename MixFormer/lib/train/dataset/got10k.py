@@ -57,6 +57,10 @@ class Got10k(BaseVideoDataset):
                 file_path = os.path.join(ltr_path, 'data_specs', 'got10k_vot_train_split.txt')
             elif split == 'votval':
                 file_path = os.path.join(ltr_path, 'data_specs', 'got10k_vot_val_split.txt')
+            elif split == 'train_temp':
+                file_path = os.path.join(ltr_path, 'data_specs', 'got10k_train_temp.txt')
+            elif split == 'val_temp':
+                file_path = os.path.join(ltr_path, 'data_specs', 'got10k_val_temp.txt')
             else:
                 raise ValueError('Unknown split name.')
             seq_ids = pandas.read_csv(file_path, header=None, squeeze=True, dtype=np.int64).values.tolist()
