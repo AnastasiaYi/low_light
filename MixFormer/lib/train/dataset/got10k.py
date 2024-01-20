@@ -37,10 +37,11 @@ class Got10k(BaseVideoDataset):
             data_fraction - Fraction of dataset to be used. The complete dataset is used by default
         """
         root = env_settings().got10k_dir if root is None else root
+        self.clean_img_root = env_settings().got10k_gt_dir
         super().__init__('GOT10k', root, image_loader)
 
         # all folders inside the root
-        self.sequence_list = self._get_sequence_list()
+        self.sequence_list = self._get_sequence_list(root)
 
         # seq_id is the index of the folder inside the got10k root path
         if split is not None:
@@ -123,8 +124,8 @@ class Got10k(BaseVideoDataset):
     def get_sequences_in_class(self, class_name):
         return self.seq_per_class[class_name]
 
-    def _get_sequence_list(self):
-        with open(os.path.join(self.root, 'list.txt')) as f:
+    def _get_sequence_list(self, root):
+        with open(os.path.join(root, 'list.txt')) as f:
             dir_list = list(csv.reader(f))
         dir_list = [dir_name[0] for dir_name in dir_list]
         return dir_list
@@ -187,3 +188,14 @@ class Got10k(BaseVideoDataset):
             anno_frames[key] = [value[f_id, ...].clone() for f_id in frame_ids]
 
         return frame_list, anno_frames, obj_meta
+        
+    def get_clean_img(self, seq_id, frame_ids):
+        sequence_list = self._get_sequence_list(self.clean_img_path)
+        seq_path = os.path.join(self.clean_img_path, self.sequence_list[seq_id])
+        frame_list = [self._get_frame(seq_path, f_id) for f_id in frame_ids]
+        return frame_list
+
+
+
+
+

@@ -164,6 +164,10 @@ class TrackingSampler(torch.utils.data.Dataset):
                 # make data augmentation
                 data = self.processing(data)
 
+                # get clean images
+                clean_images = dataset.get_clean_img(seq_id,search_frame_ids)
+                data['clean_images'] = clean_images
+
                 # check whether data is valid
                 valid = data['valid']
             except:

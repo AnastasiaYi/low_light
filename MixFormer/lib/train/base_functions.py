@@ -140,6 +140,9 @@ def build_dataloaders(cfg, settings):
                                             max_gap=cfg.DATA.MAX_SAMPLE_INTERVAL, num_search_frames=settings.num_search,
                                             num_template_frames=settings.num_template, processing=data_processing_train,
                                             frame_sample_mode=sampler_mode, train_cls=train_score, pos_prob=0.5)
+    print(dataset_train)
+    for data in dataset_train:
+      print(data.keys())
 
     train_sampler = DistributedSampler(dataset_train) if settings.local_rank != -1 else None
     shuffle = False if settings.local_rank != -1 else True
