@@ -1,5 +1,5 @@
 import torch.nn as nn
-from model.SUNet_detail import SUNet
+from SUNet.model.SUNet_detail import SUNet
 
 
 class SUNet_model(nn.Module):

@@ -190,8 +190,8 @@ class Got10k(BaseVideoDataset):
         return frame_list, anno_frames, obj_meta
         
     def get_clean_img(self, seq_id, frame_ids):
-        sequence_list = self._get_sequence_list(self.clean_img_path)
-        seq_path = os.path.join(self.clean_img_path, self.sequence_list[seq_id])
+        sequence_list = self._get_sequence_list(self.clean_img_root)
+        seq_path = os.path.join(self.clean_img_root, self.sequence_list[seq_id])
         frame_list = [self._get_frame(seq_path, f_id) for f_id in frame_ids]
         return frame_list
 

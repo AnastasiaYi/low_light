@@ -149,28 +149,34 @@ class TrackingSampler(torch.utils.data.Dataset):
                 template_frames, template_anno, meta_obj_train = dataset.get_frames(seq_id, template_frame_ids, seq_info_dict)
                 search_frames, search_anno, meta_obj_test = dataset.get_frames(seq_id, search_frame_ids, seq_info_dict)
 
+                template_clean_images = dataset.get_clean_img(seq_id,template_frame_ids)
+                search_clean_images = dataset.get_clean_img(seq_id,search_frame_ids)
+
                 H, W, _ = template_frames[0].shape
                 template_masks = template_anno['mask'] if 'mask' in template_anno else [torch.zeros((H, W))] * self.num_template_frames
                 search_masks = search_anno['mask'] if 'mask' in search_anno else [torch.zeros((H, W))] * self.num_search_frames
 
+                
+
                 data = TensorDict({'template_images': template_frames,
                                    'template_anno': template_anno['bbox'],
                                    'template_masks': template_masks,
+                                   'template_clean_images': template_clean_images,
                                    'search_images': search_frames,
                                    'search_anno': search_anno['bbox'],
                                    'search_masks': search_masks,
+                                   'search_clean_images': search_clean_images,
                                    'dataset': dataset.get_name(),
                                    'test_class': meta_obj_test.get('object_class_name')})
                 # make data augmentation
-                data = self.processing(data)
+                # data = self.processing(data)
 
                 # get clean images
-                clean_images = dataset.get_clean_img(seq_id,search_frame_ids)
-                data['clean_images'] = clean_images
 
                 # check whether data is valid
                 valid = data['valid']
             except:
+                print("error in sampler.py")
                 valid = False
 
         return data

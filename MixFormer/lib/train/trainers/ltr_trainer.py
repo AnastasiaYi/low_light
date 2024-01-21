@@ -8,6 +8,10 @@ import time
 from torch.utils.data.distributed import DistributedSampler
 from torch.cuda.amp import autocast
 from lib.train.trainers.misc import NativeScalerWithGradNormCount as NativeScaler
+# SUNet
+import yaml
+from SUNet.model.SUNet import SUNet_model
+
 
 class LTRTrainer(BaseTrainer):
     def __init__(self, actor, loaders, optimizer, settings, lr_scheduler=None, accum_iter=1,
@@ -62,7 +66,10 @@ class LTRTrainer(BaseTrainer):
         self._init_timing()
 
         self.optimizer.zero_grad()
+        print("in ltr trainer")
         for data_iter_step, data in enumerate(loader, 1):
+            sunet_input = data['template_images']+data['search_images']
+            print(len(sunet_input))
             # get inputs
             if self.move_data_to_gpu:
                 data = data.to(self.device)
