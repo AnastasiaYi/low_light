@@ -158,14 +158,14 @@ class TrackingSampler(torch.utils.data.Dataset):
 
                 
 
-                data = TensorDict({'template_images': template_frames,
-                                   'template_anno': template_anno['bbox'],
-                                   'template_masks': template_masks,
-                                   'template_clean_images': template_clean_images,
-                                   'search_images': search_frames,
-                                   'search_anno': search_anno['bbox'],
-                                   'search_masks': search_masks,
-                                   'search_clean_images': search_clean_images,
+                data = TensorDict({'template_images': torch.from_numpy(template_frames),
+                                   'template_anno': torch.from_numpy(template_anno['bbox']),
+                                   'template_masks': torch.from_numpy(template_masks),
+                                   'template_clean_images': torch.from_numpy(template_clean_images),
+                                   'search_images': torch.from_numpy(search_frames),
+                                   'search_anno': torch.from_numpy(search_anno['bbox']),
+                                   'search_masks': torch.from_numpy(search_masks),
+                                   'search_clean_images': torch.from_numpy(search_clean_images),
                                    'dataset': dataset.get_name(),
                                    'test_class': meta_obj_test.get('object_class_name')})
                 # make data augmentation
@@ -175,8 +175,8 @@ class TrackingSampler(torch.utils.data.Dataset):
 
                 # check whether data is valid
                 valid = data['valid']
-            except:
-                print("error in sampler.py")
+            except Exception as e:
+                print("error in sampler.py: ", e)
                 valid = False
 
         return data
