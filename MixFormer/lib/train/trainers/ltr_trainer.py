@@ -66,7 +66,17 @@ class LTRTrainer(BaseTrainer):
         self._init_timing()
 
         self.optimizer.zero_grad()
+
+
         print("in ltr trainer")
+        try:
+            for data_iter_step, data in enumerate(loader, 1):
+                print("in loop")
+                print(data.keys())
+        except Exception as e:
+            print("ltrtrainer error in try: ", e)
+
+
         for data_iter_step, data in enumerate(loader, 1):
             sunet_input = data['template_images']+data['search_images']
             print(len(sunet_input))

@@ -156,16 +156,19 @@ class TrackingSampler(torch.utils.data.Dataset):
                 template_masks = template_anno['mask'] if 'mask' in template_anno else [torch.zeros((H, W))] * self.num_template_frames
                 search_masks = search_anno['mask'] if 'mask' in search_anno else [torch.zeros((H, W))] * self.num_search_frames
 
-                
+                template_frames = [torch.from_numpy(i) for i in template_frames]
+                template_clean_images = [torch.from_numpy(i) for i in template_clean_images]
+                search_frames = [torch.from_numpy(i) for i in search_frames]
+                search_clean_images = [torch.from_numpy(i) for i in search_clean_images]
 
-                data = TensorDict({'template_images': torch.from_numpy(template_frames),
-                                   'template_anno': torch.from_numpy(template_anno['bbox']),
-                                   'template_masks': torch.from_numpy(template_masks),
-                                   'template_clean_images': torch.from_numpy(template_clean_images),
-                                   'search_images': torch.from_numpy(search_frames),
-                                   'search_anno': torch.from_numpy(search_anno['bbox']),
-                                   'search_masks': torch.from_numpy(search_masks),
-                                   'search_clean_images': torch.from_numpy(search_clean_images),
+                data = TensorDict({'template_images': template_frames,
+                                   'template_anno': template_anno['bbox'],
+                                   'template_masks': template_masks,
+                                   'template_clean_images': template_clean_images,
+                                   'search_images': search_frames,
+                                   'search_anno': search_anno['bbox'],
+                                   'search_masks': search_masks,
+                                   'search_clean_images': search_clean_images,
                                    'dataset': dataset.get_name(),
                                    'test_class': meta_obj_test.get('object_class_name')})
                 # make data augmentation
@@ -174,7 +177,8 @@ class TrackingSampler(torch.utils.data.Dataset):
                 # get clean images
 
                 # check whether data is valid
-                valid = data['valid']
+                # valid = data['valid']
+                data['valid'] = True
             except Exception as e:
                 print("error in sampler.py: ", e)
                 valid = False
