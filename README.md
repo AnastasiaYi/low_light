@@ -18,7 +18,7 @@ bash install_pytorch17.sh
 ## Data preparation
 The model is trained using the GOT-10k dataset, which can be found at http://got-10k.aitestunion.com/downloads.
 
-Download the dataset and place the tracking datasets in the ```./MixFormer/data/got10k ``` directory. 
+Download the dataset and place the validation part of the dataset in the ```./MixFormer/data/got10k ``` directory. The validation set of the GOT-10k dataset is used for training due to memory constraint.
 
 The directory structure should look like this:
    ```
@@ -26,10 +26,17 @@ The directory structure should look like this:
   -- MixFormer
       -- data
           -- got10k
-              |-- test
-              |-- train
               |-- val
    ```
+
+In ```/MixFormer/lib/train/admin/local.py```, please specify: 
+```
+# input path
+self.got10k_dir = '/content/low_light/MixFormer/data/got10k/val'
+# target path
+self.got10k_gt_dir = '/content/low_light/MixFormer/data/got10k/val'
+```
+
 
 
 
@@ -42,7 +49,6 @@ python tracking/create_default_local_file.py --workspace_dir . --data_dir ./data
 After running this command, you can also modify paths by editing these two files
 ```
 /MixFormer/lib/train/admin/local.py  # paths about training
-/MixFormer/lib/test/evaluation/local.py  # paths about testing
 ```
 
 ## Train the model
