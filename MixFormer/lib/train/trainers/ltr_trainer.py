@@ -11,6 +11,7 @@ from lib.train.trainers.misc import NativeScalerWithGradNormCount as NativeScale
 # SUNet
 import yaml
 from SUNet.model.SUNet import SUNet_model
+import torch.nn as nn
 
 
 class LTRTrainer(BaseTrainer):
@@ -43,6 +44,10 @@ class LTRTrainer(BaseTrainer):
         self.settings = settings
         self.use_amp = use_amp
         self.accum_iter = accum_iter
+        
+        # initialize SUNet
+        self.sunet_model = self.build_SUNet().to(self.device)
+        
         if use_amp:
             print("Using amp")
             self.loss_scaler = NativeScaler()
@@ -62,49 +67,58 @@ class LTRTrainer(BaseTrainer):
 
         self.actor.train(loader.training)
         torch.set_grad_enabled(loader.training)
-
         self._init_timing()
-
         self.optimizer.zero_grad()
 
-
-        print("in ltr trainer")
-        try:
-            for data_iter_step, data in enumerate(loader, 1):
-                print("in loop")
-                print(data.keys())
-        except Exception as e:
-            print("ltrtrainer error in try: ", e)
-
-
+        if self.move_data_to_gpu:
+            data = data.to(self.device)
+            
         for data_iter_step, data in enumerate(loader, 1):
-            sunet_input = data['template_images']+data['search_images']
-            print(len(sunet_input))
-            # get inputs
-            if self.move_data_to_gpu:
-                data = data.to(self.device)
+            # get SUNet data
+            template_images = data['template_images'].to(self.device)
+            search_images = data['search_images'].to(self.device)
+            clean_images = data["clean_images"].to(self.device)
+            
+            # Forward pass through SUNet
+            denoised_template_images = self.sunet_model(template_images)
+            denoised_search_images = self.sunet_model(search_images)
+            
+            # Compute SUNet loss
+            L1_loss = nn.L1Loss() # SUNet就是用的这个loss
+            sunet_loss = L1_loss(denoised_template_images, clean_images)  # Define or adjust compute_sunet_loss as needed
 
+            
+            # Update the data dictionary with denoised images for MixFormer
+            data['template_images'] = denoised_template_images
+            data['search_images'] = denoised_search_images
+            
+            # get MixFormer inputs
             data['epoch'] = self.epoch
             data['settings'] = self.settings
-            # forward pass
+            
+            # Forward pass through MixFormer
             if not self.use_amp:
-                loss, stats = self.actor(data)
+                mixformer_loss, stats = self.actor(data)
             else:
                 with autocast():
-                    loss, stats = self.actor(data)
-
-            loss /= self.accum_iter
+                    mixformer_loss, stats = self.actor(data)
+                    
+            # Sum up sunet_loss and mixformer_loss
+            total_loss = sunet_loss + mixformer_loss
+            
             # backward pass and update weights
             if loader.training:
                 # self.optimizer.zero_grad()
                 if not self.use_amp:
-                    loss.backward()
+                    total_loss.backward()
                     if (data_iter_step + 1) % self.accum_iter == 0:
                         if self.settings.grad_clip_norm > 0:
                             torch.nn.utils.clip_grad_norm_(self.actor.net.parameters(), self.settings.grad_clip_norm)
-                        self.optimizer.step()
+                            ## TODO 更新SUNet的参数
+                            ##torch.nn.utils.clip_grad_norm_(.......)
+                        self.optimizer.step() # 用的是什么optimizer，两个模型一样吗
                 else:
-                    self.loss_scaler(loss, self.optimizer, parameters=self.actor.net.parameters(),
+                    self.loss_scaler(total_loss, self.optimizer, parameters=self.actor.net.parameters(),
                                      clip_grad=self.settings.grad_clip_norm,
                                      update_grad=(data_iter_step + 1) % self.accum_iter == 0)
 
@@ -194,3 +208,17 @@ class LTRTrainer(BaseTrainer):
             self.tensorboard_writer.write_info(self.settings.script_name, self.settings.description)
 
         self.tensorboard_writer.write_epoch(self.stats, self.epoch)
+        
+    def build_SUNet(self):
+        ## Load yaml configuration file
+        with open('../../SUNet/training.yaml', 'r') as config:
+            opt = yaml.safe_load(config)
+        Train = opt['TRAINING']
+        OPT = opt['OPTIM']
+        ## Build Model
+        print('==> Build the model')
+        sunet_model = SUNet_model(opt)
+        return sunet_model
+        
+        
+        
