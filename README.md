@@ -1,6 +1,6 @@
 # low_light
 ## Model structure
-The proposed low-light model combines three modified models: MixForm, SUNet, and EnlightenGAN, to create a unified workflow for object tracking in low-light scenes. The workflow begins with denoising using SUNet, followed by video enhancement using EnlightenGAN, and finally object tracking using MixFormer. The directory structure for the project is as follows:
+The proposed low-light model combines three modified models: MixForm, SUNet, and EnlightenGAN, to create a unified workflow for object tracking in low-light scenes. The workflow begins with enhancement using EnlightenGAN, followed by denoising using SUNet, and finally object tracking using MixFormer. The directory structure (for now) for the project is as follows:
    ```
    ${low_light_ROOT}
   -- EnlightenGAN
@@ -30,25 +30,18 @@ The directory structure should look like this:
    ```
 
 
-
-
 ## Set project paths
 Run the following command in ./MixFormer folder to set paths for this project
 
 ```
 python tracking/create_default_local_file.py --workspace_dir . --data_dir ./data --save_dir .
 ```
-After running this command, you can also modify paths by editing these two files
-```
-/MixFormer/lib/train/admin/local.py  # paths about training
-```
-
-In ```/MixFormer/lib/train/admin/local.py```, please specify: 
+After running this command, in ```/MixFormer/lib/train/admin/local.py```, please specify: 
 ```
 # input path -- synthesised low-light dataset.
 
 self.got10k_dir = '/content/low_light/MixFormer/data/got10k/dark'
-# target path
+# target path -- clean daylight image used for training SUNet.
 self.got10k_gt_dir = '/content/low_light/MixFormer/data/got10k/val'
 ```
 
@@ -68,7 +61,7 @@ Download the cvt model ```CvT-21-384x384-IN-1k.pth``` from [here](https://onedri
    ```
 
 ### Run training
-Training with multiple GPUs using DDP. CVT is used as the backbone. Configuration script can be found at ```/MixFormer/experiments/mixformer_cvt/baseline_1k.yaml```. Run  ```/MixFormer/tracking/train_mixformer_cvt.sh``` to train.
+CVT is used as the backbone. Configuration script can be found at ```/MixFormer/experiments/mixformer_cvt/baseline_1k.yaml```. Run ```/MixFormer/tracking/train_mixformer_cvt.sh``` to train. You can also specify the number of gpu used by modifying the ```--nproc_per_node``` in ```/MixFormer/tracking/train_mixformer_cvt.sh```.
 ``` 
 bash tracking/train_mixformer_cvt.sh
 ```
