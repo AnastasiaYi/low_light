@@ -1,5 +1,13 @@
 # low_light
-
+## Model structure
+The proposed low-light model combines three modified models: MixForm, SUNet, and EnlightenGAN, to create a unified workflow for object tracking in low-light scenes. The workflow begins with denoising using SUNet, followed by video enhancement using EnlightenGAN, and finally object tracking using MixFormer. The directory structure for the project is as follows:
+   ```
+   ${low_light_ROOT}
+  -- EnlightenGAN
+  -- MixFormer
+      -- SUNet
+      ...
+   ```
 ## Install the environment
 Use the Anaconda
 ```
@@ -7,7 +15,7 @@ conda create -n mixformer python=3.6
 conda activate mixformer
 bash install_pytorch17.sh
 ```
-## Data Preparation
+## Data preparation
 The model is trained using the GOT-10k dataset, which can be found at http://got-10k.aitestunion.com/downloads.
 
 Download the dataset and place the tracking datasets in the ```./MixFormer/data/got10k ``` directory. 
