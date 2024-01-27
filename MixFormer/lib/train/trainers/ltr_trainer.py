@@ -44,9 +44,10 @@ class LTRTrainer(BaseTrainer):
         self.settings = settings
         self.use_amp = use_amp
         self.accum_iter = accum_iter
-        
+        self.L1_loss = nn.L1Loss() # SUNet就是用的这个loss
         # initialize SUNet
         self.sunet_model = self.build_SUNet().to(self.device)
+        self.optimizer_sunet = torch.optim.Adam(self.sunet_model.parameters(), lr=2e-4, betas=(0.9, 0.999), eps=1e-8)
         
         if use_amp:
             print("Using amp")
@@ -84,8 +85,7 @@ class LTRTrainer(BaseTrainer):
             denoised_search_images = self.sunet_model(search_images)
             
             # Compute SUNet loss
-            L1_loss = nn.L1Loss() # SUNet就是用的这个loss
-            sunet_loss = L1_loss(denoised_template_images, clean_images)  # Define or adjust compute_sunet_loss as needed
+            sunet_loss = self.L1_loss(denoised_template_images, clean_images)  # Define or adjust compute_sunet_loss as needed
 
             
             # Update the data dictionary with denoised images for MixFormer
@@ -114,9 +114,9 @@ class LTRTrainer(BaseTrainer):
                     if (data_iter_step + 1) % self.accum_iter == 0:
                         if self.settings.grad_clip_norm > 0:
                             torch.nn.utils.clip_grad_norm_(self.actor.net.parameters(), self.settings.grad_clip_norm)
-                            ## TODO 更新SUNet的参数
-                            ##torch.nn.utils.clip_grad_norm_(.......)
-                        self.optimizer.step() # 用的是什么optimizer，两个模型一样吗
+                            torch.nn.utils.clip_grad_norm_(self.sunet_model.parameters(), self.settings.grad_clip_norm)
+                        self.optimizer.step()    
+                        self.optimizer_sunet.step()
                 else:
                     self.loss_scaler(total_loss, self.optimizer, parameters=self.actor.net.parameters(),
                                      clip_grad=self.settings.grad_clip_norm,
@@ -124,6 +124,7 @@ class LTRTrainer(BaseTrainer):
 
             if (data_iter_step + 1) % self.accum_iter == 0:
                 self.optimizer.zero_grad()
+                self.optimizer_sunet.zero_grad()
             torch.cuda.synchronize()
 
             # update statistics
@@ -213,7 +214,6 @@ class LTRTrainer(BaseTrainer):
         ## Load yaml configuration file
         with open('../../SUNet/training.yaml', 'r') as config:
             opt = yaml.safe_load(config)
-        Train = opt['TRAINING']
         OPT = opt['OPTIM']
         ## Build Model
         print('==> Build the model')
